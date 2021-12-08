@@ -1,28 +1,30 @@
 package jm.task.core.jdbc;
 
+import jm.task.core.jdbc.model.User;
+import jm.task.core.jdbc.service.UserService;
 import jm.task.core.jdbc.service.UserServiceImpl;
 
 public class Main {
+    private static final UserService userService = new UserServiceImpl();
+    private static final User user1 = new User("Ivan", "Ivanov", (byte) 20);
+    private static final User user2 = new User("Petr", "Petrov", (byte) 25);
+    private static final User user3 = new User("Oleg", "Egorov", (byte) 30);
+    private static final User user4 = new User("Sasha", "Popov", (byte) 35);
+
     public static void main(String[] args) {
-        UserServiceImpl us = new UserServiceImpl();
+        userService.createUsersTable();
 
-        // 1. Создание таблицы User(ов)
-        us.createUsersTable();
+        userService.saveUser(user1.getName(), user1.getLastName(), user1.getAge());
+        userService.saveUser(user2.getName(), user2.getLastName(), user2.getAge());
+        userService.saveUser(user3.getName(), user3.getLastName(), user3.getAge());
+        userService.saveUser(user4.getName(), user4.getLastName(), user4.getAge());
 
-        // 2. Добавление 4 User(ов) в таблицу с данными на свой выбор.
-        //    После каждого добавления должен быть вывод в консоль ( User с именем – name добавлен в базу данных )
-        us.saveUser("Иван", "Соколов", (byte) 37);
-        us.saveUser("Сергей", "Петров", (byte) 21);
-        us.saveUser("Андрей", "Ласточкин", (byte) 27);
-        us.saveUser("Алексей", "Манн", (byte) 42);
+        userService.getAllUsers().forEach(System.out::println);
 
-        // 3. Получение всех User из базы и вывод в консоль ( должен быть переопределен toString в классе User )
-        us.getAllUsers().forEach(System.out::println);
+        userService.removeUserById(0);
 
-        // 4. Очистка таблицы User(ов)
-        us.cleanUsersTable();
+        userService.cleanUsersTable();
 
-        // 5. Удаление таблицы
-        us.dropUsersTable();
+        userService.dropUsersTable();
     }
 }

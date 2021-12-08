@@ -3,107 +3,134 @@ package jm.task.core.jdbc.dao;
 import jm.task.core.jdbc.model.User;
 import jm.task.core.jdbc.util.Util;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.sql.ResultSet;
 
 public class UserDaoJDBCImpl implements UserDao {
-
     private static Connection connection;
-
     static {
-        try {
-            connection = Util.getConnection();
-        } catch (SQLException e) {
-            System.out.println("Can't connect to DB!");
-            e.printStackTrace();
-        }
+        connection = Util.getConnection();
     }
 
-    public void createUsersTable() {
-        try {
-            String sql = "CREATE TABLE IF NOT EXISTS users" +
-                    "(" +
-                    "id BIGINT auto_increment, " +
-                    "name VARCHAR(64) not null, " +
-                    "lastName VARCHAR(128) not null, " +
-                    "age tinyint not null, " +
-                    "constraint table_name_pk " +
-                    "unique (id) " +
-                    ");";
-            Statement stmt = connection.createStatement();
-            stmt.executeUpdate(sql);
+    public UserDaoJDBCImpl() {
+    }
 
+    public  void createUsersTable() {
+        try {
+            PreparedStatement pstmt = connection.prepareStatement("CREATE TABLE IF NOT EXISTS sys.users( " +
+                    "id BIGINT  NOT NULL AUTO_INCREMENT , " +
+                    " name VARCHAR(40) NOT NULL , " +
+                    " lastName VARCHAR(40) NOT NULL ,  " +
+                    "age TINYINT NOT NULL , " +
+                    "PRIMARY KEY(id) ); ");
+            System.out.println("Таблица создана");
+            pstmt.execute();
+            connection.commit();
         } catch (SQLException e) {
+            try {
+                connection.rollback();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+            }
             e.printStackTrace();
         }
     }
 
     public void dropUsersTable() {
         try {
-            String sql = "DROP TABLE IF EXISTS users";
-            Statement stmt = connection.createStatement();
-            stmt.executeUpdate(sql);
-
+            PreparedStatement pstmt = connection.prepareStatement("USE sys");
+            pstmt.execute("DROP TABLE  IF EXISTS users ; ");
+            connection.commit();
+            System.out.println("Таблица удалена");
         } catch (SQLException e) {
+            try {
+                connection.rollback();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+            }
             e.printStackTrace();
         }
     }
 
     public void saveUser(String name, String lastName, byte age) {
         try {
-            String sql = "INSERT INTO users (name, lastName, age) VALUES(?, ?, ?)";
-            PreparedStatement pstmt = connection.prepareStatement(sql);
+            PreparedStatement pstmt = connection.prepareStatement("INSERT INTO users ( name , LastName ,age ) VALUES (?,?,?);");
             pstmt.setString(1, name);
             pstmt.setString(2, lastName);
             pstmt.setByte(3, age);
-            if (pstmt.executeUpdate() == 1) {
-                System.out.println("User с именем – " + name + " добавлен в базу данных");
-            }
+            pstmt.execute();
 
+            connection.commit();
         } catch (SQLException e) {
+            try {
+                connection.rollback();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+            }
             e.printStackTrace();
         }
     }
 
     public void removeUserById(long id) {
         try {
-            String sql = "DELETE FROM users WHERE id=?";
-            PreparedStatement pstmt = connection.prepareStatement(sql);
-            pstmt.setLong(1, id);
-            pstmt.executeUpdate();
+            PreparedStatement pstmt = connection.prepareStatement("DELETE FROM users WHERE id = " + id);
+            pstmt.execute();
+            connection.commit();
+            System.out.println("User удален");
         } catch (SQLException e) {
+            try {
+                connection.rollback();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+            }
             e.printStackTrace();
         }
     }
 
-    public List<User> getAllUsers() {
-        List<User> userList = new LinkedList<>();
+    public List< User > getAllUsers() {
+        List< User > users = new ArrayList<>();
         try {
-            String sql = "SELECT * FROM users";
-            Statement stmt = connection.createStatement();
-            ResultSet rs = stmt.executeQuery(sql);
+            PreparedStatement pstmt = connection.prepareStatement("SELECT * FROM users ; ");
+            ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
-                User user = new User(rs.getString("name"),
-                        rs.getString("lastName"),
-                        rs.getByte("age"));
+                User user = new User();
                 user.setId(rs.getLong("id"));
-                userList.add(user);
+                user.setName(rs.getString("name"));
+                user.setLastName(rs.getString("LastName"));
+                user.setAge(rs.getByte("age"));
+                users.add(user);
             }
+            connection.commit();
         } catch (SQLException e) {
+            try {
+                connection.rollback();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+            }
             e.printStackTrace();
         }
-
-        return userList;
+        return users;
     }
 
     public void cleanUsersTable() {
         try {
-            String sql = "TRUNCATE users";
-            Statement stmt = connection.createStatement();
-            stmt.executeUpdate(sql);
+            PreparedStatement pstmt = connection.prepareStatement(" TRUNCATE TABLE  users ;");
+            pstmt.execute();
+            connection.commit();
+            System.out.println("Таблица очищена");
         } catch (SQLException e) {
+            try {
+                connection.rollback();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+            }
             e.printStackTrace();
+            System.out.println("Не удалось очистить");
         }
     }
 }
