@@ -31,6 +31,7 @@ public class UserDaoJDBCImpl implements UserDao {
             System.out.println("Таблица создана");
             pstmt.execute();
             connection.commit();
+            pstmt.close();
         } catch (SQLException e) {
             try {
                 connection.rollback();
@@ -47,6 +48,7 @@ public class UserDaoJDBCImpl implements UserDao {
             pstmt.execute("DROP TABLE  IF EXISTS users ; ");
             connection.commit();
             System.out.println("Таблица удалена");
+            pstmt.close();
         } catch (SQLException e) {
             try {
                 connection.rollback();
@@ -64,8 +66,8 @@ public class UserDaoJDBCImpl implements UserDao {
             pstmt.setString(2, lastName);
             pstmt.setByte(3, age);
             pstmt.execute();
-
             connection.commit();
+            pstmt.close();
         } catch (SQLException e) {
             try {
                 connection.rollback();
@@ -82,6 +84,7 @@ public class UserDaoJDBCImpl implements UserDao {
             pstmt.execute();
             connection.commit();
             System.out.println("User удален");
+            pstmt.close();
         } catch (SQLException e) {
             try {
                 connection.rollback();
@@ -106,6 +109,7 @@ public class UserDaoJDBCImpl implements UserDao {
                 users.add(user);
             }
             connection.commit();
+            pstmt.close();
         } catch (SQLException e) {
             try {
                 connection.rollback();
@@ -123,6 +127,7 @@ public class UserDaoJDBCImpl implements UserDao {
             pstmt.execute();
             connection.commit();
             System.out.println("Таблица очищена");
+            pstmt.close();
         } catch (SQLException e) {
             try {
                 connection.rollback();
