@@ -21,7 +21,7 @@ public class Main {
 
         userService.getAllUsers().forEach(System.out::println);
 
-        userService.removeUserById(0);
+        userService.getAllUsers();
 
         userService.cleanUsersTable();
 
